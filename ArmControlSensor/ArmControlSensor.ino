@@ -26,9 +26,12 @@ SerialComms serialComms;
 StateManager stateManager;
 
 // Build 3 motors with pins, speed, and gear ratios
-Motor baseMotor(2, 3, 4000, 16.0/3.0, 0, 0);  // adjust with actual sensor value
-Motor elbowMotor(4, 5, 1700, 5.18 * 93.0/25.0, 1, 100); // 
-Motor wristMotor(6, 7, 20000, 1.0, 2, 45);
+// Motor baseMotor(2, 3, 4000, 16.0/3.0, 0, 193);  // adjust with actual sensor value
+// Motor elbowMotor(4, 5, 1700, 5.18 * 93.0/25.0, 1, 100); // 
+// Motor wristMotor(6, 7, 20000, 1.0, 2, 45);
+Motor baseMotor(2, 3, 10000, 16.0/3.0, 0, 193);  // adjust with actual sensor value
+Motor elbowMotor(4, 5, 500, 5.18 * 93.0/25.0, 1, 100); // 
+Motor wristMotor(6, 7, 30000, 1.0, 2, 45);
 
 
 
@@ -80,22 +83,16 @@ int moveToPosition(int targetBase, int targetElbow, int targetWrist) {
       }
     }
     return 0;
-    // baseMotor.updatePosition(baseCounter);
-    // elbowMotor.updatePosition(elbowCounter);
-    // wristMotor.updatePosition(wristCounter);
-    // baseMotor.currentAngle = targetBase;
-    // elbowMotor.currentAngle = targetElbow;
-    // wristMotor.currentAngle = targetWrist;
   }
 
 void checkMotorStatus(int motorCode){
   if(!motorCode){ //All motors moved with error range
-    serialComms.writeSerial(ACCEPTED);
+    serialComms.writeSerial("000");
   }
   else{
     String errorCode = ACCEPTED;
     errorCode[motorCode - 1] = "1";
-    stateManager.error(errorCode);
+    Serial.println(errorCode);
   }
 }
 
@@ -116,27 +113,29 @@ bool calibration() {
 void setup() {
       Serial.begin(9600);  // Initialize serial communication
       delay(500);
+      // Serial.println("Setup");
 }
 
 void loop() {
     int state, baseAngle, elbowAngle, wristAngle;
+    // Serial.println("Loop");
 
     if (serialComms.readSerial(state, baseAngle, elbowAngle, wristAngle)) {
-        // serialComms.writeSerial("State: " + String(state) + "   Base Angle: " + String(baseAngle) + 
-        //                     "     Elbow Angle: " + String(elbowAngle) + "     Wrist Angle: " + String(wristAngle));
+        serialComms.writeSerial("State: " + String(state) + "   Base Angle: " + String(baseAngle) + 
+                            "     Elbow Angle: " + String(elbowAngle) + "     Wrist Angle: " + String(wristAngle));
         switch (state) {
             case 0:
                 stateManager.stop();
-                serialComms.writeSerial(ACCEPTED);
+                serialComms.writeSerial("000");
                 break;
             case 1:
                   stateManager.standby();
-                  serialComms.writeSerial(ACCEPTED);
+                  serialComms.writeSerial("000"); // FIX###############
                 break;
             case 2:
                 if(stateManager.calibrate()){
                   if (calibration()) {
-                    serialComms.writeSerial(ACCEPTED);
+                    serialComms.writeSerial("000");  // FIX###############
                   } 
                   // else {
                   //   stateManager.error("001");

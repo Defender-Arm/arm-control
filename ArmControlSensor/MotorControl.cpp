@@ -8,7 +8,7 @@ Motor::Motor(int stepPin, int dirPin, int stepDelay, float gearRatio, int sensor
     this->sensorIndex = sensorIndex;
     this->sensorOffset = sensorOffset;
 
-    this->currentAngle = getAngle() - sensorOffset;
+    this->currentAngle = getAngle();
 
     pinMode(stepPin, OUTPUT);
     pinMode(dirPin, OUTPUT);
@@ -50,12 +50,19 @@ int Motor::getAngle(){
   delay(5);
 
   if (!encoder.begin()) {
-    // String errorCode = "000";
-    // Serial.println((errorCode.replace(sensorIndex, "1")));
+    char errorCode[] = "000";
+    errorCode[sensorIndex] = "1";
+    // Serial.println(errorCode);
+    // Serial.println("Sensor");
     return -1;
   } else {
     int raw = encoder.readAngle();
-    return round(raw * (360.0 / 4096.0));  // Convert to degrees
+    int angle = round(raw * (360.0 / 4096.0)) -  sensorOffset;  // Convert to degrees
+    if (angle > 180) {
+      angle -= 360;
+    }
+
+    return angle* (sensorIndex == 1 ? -1 : 1);;
   }
 }
 
