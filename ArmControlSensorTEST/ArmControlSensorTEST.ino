@@ -26,7 +26,7 @@ StateManager stateManager;
 
 // Build 3 motors with pins, speed, and gear ratios
 Motor baseMotor(2, 3, 3500, 16.0/3.0, 0, 193);  
-Motor elbowMotor(4, 5, 1500, 5.18 * 93.0/25.0, 1, 100); 
+Motor elbowMotor(4, 5, 1500, 5.18 * 93.0/25.0, 1, 90); 
 Motor wristMotor(6, 7, 17000, 1.0, 2, 45);
 
 int moveToPosition(float targetBase, float targetElbow, float targetWrist) {
@@ -79,14 +79,14 @@ void checkMotorStatus(int motorCode){
 bool calibration(){
   int positions[][3] = { {0, 0, 0}, {60, 55, 179}, {-60, -25, 90}, {0, 0, 0}, {0, 0, 0} };
 
-    // for (int i = 0; i < 4; i++) {
-    //     int motorCode = moveToPosition(positions[i][0], positions[i][1], positions[i][2]);
-    //     checkMotorStatus(motorCode);
-    //     if (motorCode != 0) {
-    //         return false;
-    //     }
-    //     delay(1000);
-    // }
+    for (int i = 0; i < 4; i++) {
+        int motorCode = moveToPosition(positions[i][0], positions[i][1], positions[i][2]);
+        checkMotorStatus(motorCode);
+        if (motorCode != 0) {
+            return false;
+        }
+        delay(1000);
+    }
   return true;
 }
 
@@ -111,11 +111,11 @@ void loop() {
         switch (state) {
             case 0:
                 stateManager.stop();
-                serialComms.writeSerial("000");
+                // serialComms.writeSerial("000");
                 break;
             case 1:
                   stateManager.standby();
-                  serialComms.writeSerial("000");
+                  // serialComms.writeSerial("000");
                 break;
             case 2:
                 if(stateManager.calibrate()){
@@ -132,7 +132,7 @@ void loop() {
                 break;
             case 3:
                 if(stateManager.ready()){
-                  serialComms.writeSerial("000");
+                  // serialComms.writeSerial("000");
                 }
                 else{
                   serialComms.writeSerial("011");
@@ -140,7 +140,7 @@ void loop() {
                 break;
             case 4:
                 if(stateManager.active()){
-                  serialComms.writeSerial("000");
+                  // serialComms.writeSerial("000");
                   moveToPosition(baseAngle, elbowAngle, wristAngle);
                   // serialComms.writeSerial("000");
                   // if (!motorCode){
